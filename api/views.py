@@ -87,3 +87,13 @@ def removeTrip(request, tid):
     return Response('Trip deleted successfully!')
 
 
+@api_view(['PUT'])
+def takePlace(request, tid):
+    if request.user.is_authenticated:
+        user = request.user
+        
+
+    else:
+        return Response('You are not logged in!')
+
+

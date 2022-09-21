@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    gender = models.BooleanField()
     phone = models.IntegerField(max_length=10)
     public_Number = models.IntegerField(max_length=11)
     e_Wallet = models.CharField(max_length=10, unique=True)
