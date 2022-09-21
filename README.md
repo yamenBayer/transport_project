@@ -11,4 +11,4 @@ Back-end for transport application.
 5. run your front-end application in the same localhost.
 6. use the endpoints to connect with the API.
 
-if you had any problem you can contact us: yamen.warsss@gmail.com
+If you had any problem you can contact me: yamen.warsss@gmail.com
