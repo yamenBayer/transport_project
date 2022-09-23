@@ -89,8 +89,8 @@ def getRoutes(request):
 
 @api_view(['POST'])
 def sign_up(request):
-#   if request.user.is_authenticated:
-#     return Response('Already logged in!')
+  if request.user.is_authenticated:
+    return Response('Already logged in!')
 
   if request.method == "POST":
     data = request.data
@@ -135,8 +135,8 @@ def sign_up(request):
 
 @api_view(['POST'])
 def log_in(request):
-#    if request.user.is_authenticated:
-#       return Response('Already looged in!')
+   if request.user.is_authenticated:
+      return Response('Already looged in!')
 
    if request.method == "POST":
       data = request.data
@@ -165,18 +165,19 @@ def getTrips(request):
     serializer = TripSerializer(trips, many=True)
     return Response(serializer.data)
 
-
-# @api_view(['GET'])
-# def getMyTrips(request):
-#     trips = Trip.objects.get()
-#     serializer = TripSerializer(trips, many=True)
-#     return Response(serializer.data)
-
 @api_view(['GET'])
 def getTrip(request, tid):
     trip = Trip.objects.get(id = tid)
     serializer = TripSerializer(trip, many=False)
     return Response(serializer.data)
+
+@api_view(['GET'])
+def getMyTrips(request):
+    if request.user.is_authenticated:
+        profile = Profile.objects.get(user = request.user)
+        reservations = Reservation.objects.filter(phone = profile.phone)
+        serializer = TripSerializer(reservations.trip, many=True)
+        return Response(serializer.data)
 
 @api_view(['POST'])
 def createTrip(request):
@@ -234,9 +235,8 @@ def takePlace(request, tid):
 
         if sitsINT <= trip.capacity:
             total = sitsINT * trip.cost
-            reservation = Reservation(owner_name = profile.user.username, phone = profile.phone, sits_amount = sitsINT, total_cost = total)
+            reservation = Reservation(owner_name = profile.user.username, trip = trip.id, phone = profile.phone, sits_amount = sitsINT, total_cost = total)
             reservation.save()
-            trip.reservations.add(reservation)
             trip.counter += sitsINT
             return Response('Reservation successfully done.')
         else:
