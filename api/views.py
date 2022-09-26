@@ -1,7 +1,7 @@
 from asyncio.windows_events import NULL
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import TripSerializer
+from .serializers import ReservationSerializer, TripSerializer
 from .models import Profile, Reservation, Trip
 from django.contrib.auth import authenticate ,login,logout
 from django.contrib.auth.backends import ModelBackend
@@ -36,7 +36,7 @@ def getRoutes(request):
             'description' : 'Returns an array of trips'
         },
         {
-            'Endpoint' : '/trips/id',
+            'Endpoint' : '/trips/<id>',
             'method' : 'GET',
             'body' : None,
             'description' : 'Returns a single trip object'
@@ -48,19 +48,19 @@ def getRoutes(request):
             'description' : 'Create new trip with data sent in post request'
         },
         {
-            'Endpoint' : '/trips/id/update/',
+            'Endpoint' : '/trips/<id>/update/',
             'method' : 'PUT',
             'body' : {'body': ""},
             'description' : 'Update trip information with data sent in post request'
         },
         {
-            'Endpoint' : '/trips/id/delete/',
+            'Endpoint' : '/trips/<id>/delete/',
             'method' : 'DELETE',
             'body' : None,
             'description' : 'Deletes an existing trip'
         },
         {
-            'Endpoint' : '/trips/e_Wallet/charge/',
+            'Endpoint' : '/trips/<e_Wallet>/charge/',
             'method' : 'PUT',
             'body' : {'body': ""},
             'description' : 'Charge an existing account with specific amount.'
@@ -83,6 +83,18 @@ def getRoutes(request):
             'body' : None,
             'description' : 'Logout from the authenticated account.'
         },
+        {
+            'Endpoint' : 'trips/<trip_id>/reservation',
+            'method' : 'PUT',
+            'body' : {'body': ""},
+            'description' : 'Make new reservation for one user or more.'
+        },
+        {
+            'Endpoint' : 'search/<source>/<destination>/<date>/<time>',
+            'method' : 'GET',
+            'body' : {'body': ""},
+            'description' : 'Search for specific trip.'
+        },
 
     ]
     return Response(routes)
@@ -94,6 +106,7 @@ def sign_up(request):
 
   if request.method == "POST":
     data = request.data
+
     first_name = data['first_name']
     last_name = data['last_name']
     public_Number = data['public_Number']
@@ -176,7 +189,7 @@ def getMyTrips(request):
     if request.user.is_authenticated:
         profile = Profile.objects.get(user = request.user)
         reservations = Reservation.objects.filter(phone = profile.phone)
-        serializer = TripSerializer(reservations.trip, many=True)
+        serializer = ReservationSerializer(reservations, many=True)
         return Response(serializer.data)
 
 @api_view(['POST'])
@@ -204,8 +217,11 @@ def editTrip(request, tid):
     serializer = TripSerializer(trip, data=request.data)
     if serializer.is_valid():
         serializer.save()
+        return Response('Successfully edited!')
+    else:
+        return Response('The form is invalid!')
         
-    return Response('Successfully edited!')
+    
 
 @api_view(['DELETE'])
 def removeTrip(request, tid):
@@ -214,9 +230,9 @@ def removeTrip(request, tid):
 
 
 @api_view(['GET'])
-def search(request, source, destination):
-    if Trip.objects.filter(source = source, destination = destination).exists():
-        trips = Trip.objects.filter(source = source, destination = destination)
+def search(request, source, destination, date, time):
+    if Trip.objects.filter(source = source, destination = destination, date = date, trip_Time = time).exists():
+        trips = Trip.objects.filter(source = source, destination = destination, date = date, trip_Time = time)
         serializer = TripSerializer(trips, many=True)
         return Response(serializer.data)
     return Response('No results!')
@@ -230,15 +246,31 @@ def takePlace(request, tid):
             return Response('The bus is full!')
 
         data = request.data
-        sits = data['sits']
-        sitsINT = int(sits)
+        seat = data['seatNum']
+        seatINT = int(seat)
 
-        if sitsINT <= trip.capacity:
-            total = sitsINT * trip.cost
-            reservation = Reservation(owner_name = profile.user.username, trip = trip.id, phone = profile.phone, sits_amount = sitsINT, total_cost = total)
-            reservation.save()
-            trip.counter += sitsINT
-            return Response('Reservation successfully done.')
+        if seatINT <= trip.capacity:
+            total = seatINT * trip.cost
+            if total <= profile.balance:
+                users = []
+
+                for i in range(seatINT):
+                    next_seat = 'seat_' + str(i)
+                    next_phone = data[next_seat]
+                    try:
+                        users.append(Profile.objects.get(phone = next_phone))
+                    except Profile.DoesNotExist:
+                        return Response('There is a user who does not exist!')
+                        
+                for u in users:
+                    next_reservation = Reservation(owner_name = u.user.username, trip = trip, phone = u.phone, cost = trip.cost)
+                    next_reservation.save()
+
+                profile.balance -= total
+                trip.counter += seatINT
+                return Response('Reservation successfully done.')
+            else:
+                return Response('No enouph money!')
         else:
             return Response('No enough space!')
         
@@ -250,12 +282,18 @@ def takePlace(request, tid):
 def charge(request, e_wallet):
     if Profile.objects.filter(e_Wallet = e_wallet).exists():
         profile = Profile.objects.get(e_Wallet = e_wallet)
+        my_profile = Profile.objects.get(user = request.user)
         data = request.data
         amount = data['amount']
         amountINT = int(amount)
-        profile.balance += amountINT
-        profile.save()
-        return Response('Successfully charged!')
+        if my_profile.balance >= amountINT:
+            profile.balance += amountINT
+            my_profile.balance -= amountINT
+            my_profile.save()
+            profile.save()
+            return Response('Successfully charged!')
+        else:
+            return Response('No enouph money!')
     else:
         return Response('The client is not exists!')
 

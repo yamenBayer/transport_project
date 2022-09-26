@@ -7,7 +7,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     gender = models.BooleanField()
     phone = models.CharField(max_length=10, unique=True)
-    public_Number = models.IntegerField(max_length=11, unique=True)
+    public_Number = models.CharField(max_length=11, unique=True)
     e_Wallet = models.CharField(max_length=10, unique=True)
     is_Admin = models.BooleanField(default=False)
     is_Charger = models.BooleanField(default=False)
@@ -44,8 +44,7 @@ class Reservation(models.Model):
     owner_name = models.CharField(max_length=100)
     trip = models.ForeignKey(Trip, related_name='trip' , on_delete= models.CASCADE)
     phone = models.CharField(max_length=10)
-    sits_amount = models.IntegerField(default=1)
-    total_cost = models.IntegerField()
+    cost = models.IntegerField()
 
     def __str__(self):
         return self.owner_name
