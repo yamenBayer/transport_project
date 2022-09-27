@@ -44,13 +44,29 @@ def getRoutes(request):
         {
             'Endpoint' : '/trips/create/',
             'method' : 'POST',
-            'body' : {'body': ""},
+            'body' : {
+                'title': "String|Required",
+                'date': "Date",
+                'trip_Time': "Time",
+                'is_Vip': "Boolean",
+                'cost': "Integer",
+                'source': "String|Required",
+                'destination': "String|Required"
+            },
             'description' : 'Create new trip with data sent in post request'
         },
         {
             'Endpoint' : '/trips/<id>/update/',
             'method' : 'PUT',
-            'body' : {'body': ""},
+            'body' : {
+                'title': "String|Required",
+                'date': "Date",
+                'trip_Time': "Time",
+                'is_Vip': "Boolean",
+                'cost': "Integer",
+                'source': "String|Required",
+                'destination': "String|Required"
+                },
             'description' : 'Update trip information with data sent in post request'
         },
         {
@@ -62,19 +78,32 @@ def getRoutes(request):
         {
             'Endpoint' : '/trips/<e_Wallet>/charge/',
             'method' : 'PUT',
-            'body' : {'body': ""},
+            'body' : {
+                'amount': "Integer|Required"
+                },
             'description' : 'Charge an existing account with specific amount.'
         },
         {
             'Endpoint' : '/signup/',
             'method' : 'POST',
-            'body' : {'body': ""},
+            'body' : {
+                'first_name': "String",
+                'last_name': "String",
+                'public_Number': "String|Required",
+                'phone': "String|Required",
+                'gender': "String|Required",
+                'password': "String|Required",
+                'password_confirm': "String|Required"
+                },
             'description' : 'Create new account.'
         },
         {
             'Endpoint' : '/login/',
             'method' : 'POST',
-            'body' : {'body': ""},
+            'body' : {
+                'phone': "String|Required",
+                'password': "String|Required"
+                },
             'description' : 'Login to existing account.'
         },
         {
@@ -86,13 +115,22 @@ def getRoutes(request):
         {
             'Endpoint' : 'trips/<trip_id>/reservation',
             'method' : 'PUT',
-            'body' : {'body': ""},
+            'body' : {
+                'seatNum': "Integer|Required",
+                'for i=0 to seatNum do:'
+                'seat_i': "String|Required",
+                },
             'description' : 'Make new reservation for one user or more.'
         },
         {
             'Endpoint' : 'search/<source>/<destination>/<date>/<time>',
             'method' : 'GET',
-            'body' : {'body': ""},
+            'body' : {
+                'source': "String",
+                'destination': "String",
+                'date': "date"
+                'time': "time"
+                },
             'description' : 'Search for specific trip.'
         },
 
@@ -230,7 +268,12 @@ def removeTrip(request, tid):
 
 
 @api_view(['GET'])
-def search(request, source, destination, date, time):
+def search(request):
+    data = request.data
+    source = data['source']
+    destination = data['destination']
+    date = data['date']
+    time = data['time']
     if Trip.objects.filter(source = source, destination = destination, date = date, trip_Time = time).exists():
         trips = Trip.objects.filter(source = source, destination = destination, date = date, trip_Time = time)
         serializer = TripSerializer(trips, many=True)
