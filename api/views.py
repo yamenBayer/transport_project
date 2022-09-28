@@ -123,12 +123,12 @@ def getRoutes(request):
             'description' : 'Make new reservation for one user or more.'
         },
         {
-            'Endpoint' : 'search/<source>/<destination>/<date>/<time>',
+            'Endpoint' : 'search/',
             'method' : 'GET',
             'body' : {
                 'source': "String",
                 'destination': "String",
-                'date': "date"
+                'date': "date",
                 'time': "time"
                 },
             'description' : 'Search for specific trip.'
