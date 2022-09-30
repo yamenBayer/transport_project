@@ -1,7 +1,7 @@
 from asyncio.windows_events import NULL
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import ReservationSerializer, TripSerializer
+from .serializers import ProfileSerializer, ReservationSerializer, TripSerializer
 from .models import Profile, Reservation, Trip
 from django.contrib.auth import authenticate ,login,logout
 from django.contrib.auth.backends import ModelBackend
@@ -113,7 +113,13 @@ def getRoutes(request):
             'description' : 'Logout from the authenticated account.'
         },
         {
-            'Endpoint' : 'trips/<trip_id>/reservation',
+            'Endpoint' : '/trips/me/<str:e_wallet>',
+            'method' : 'GET',
+            'body' : None,
+            'description' : 'Returns list of reservation for specific profile.'
+        },
+        {
+            'Endpoint' : 'trips/<trip_id>/<str:e_wallet>/reservation',
             'method' : 'PUT',
             'body' : {
                 'seatNum': "Integer|Required",
@@ -186,8 +192,8 @@ def sign_up(request):
 
 @api_view(['POST'])
 def log_in(request):
-   if request.user.is_authenticated:
-      return Response('Already looged in!')
+#    if request.user.is_authenticated:
+#       return Response('Already looged in!')
 
    if request.method == "POST":
       data = request.data
@@ -197,7 +203,9 @@ def log_in(request):
       user = authenticate(username=phone, password=password)
       if user is not None:
         login(request, user)
-        return Response('Logged in!')
+        prof = Profile.objects.get(user = user)
+        serializer = ProfileSerializer(prof, many=False)
+        return Response(serializer)
 
       return Response('Something went wrong!')
       
@@ -223,12 +231,11 @@ def getTrip(request, tid):
     return Response(serializer.data)
 
 @api_view(['GET'])
-def getMyTrips(request):
-    if request.user.is_authenticated:
-        profile = Profile.objects.get(user = request.user)
-        reservations = Reservation.objects.filter(phone = profile.phone)
-        serializer = ReservationSerializer(reservations, many=True)
-        return Response(serializer.data)
+def getMyTrips(request, e_wallet):
+    profile = Profile.objects.get(e_Wallet = e_wallet)
+    reservations = Reservation.objects.filter(phone = profile.phone)
+    serializer = ReservationSerializer(reservations, many=True)
+    return Response(serializer.data)
 
 @api_view(['POST'])
 def createTrip(request):
@@ -281,43 +288,41 @@ def search(request):
     return Response('No results!')
 
 @api_view(['PUT'])
-def takePlace(request, tid):
-    if request.user.is_authenticated:
-        profile = Profile.objects.get(user = request.user)
-        trip = Trip.objects.get(id = tid)
-        if trip.capacity <= trip.counter:
-            return Response('The bus is full!')
+def takePlace(request, tid, e_wallet):
+    profile = Profile.objects.get(e_Wallet = e_wallet)
+    trip = Trip.objects.get(id = tid)
+    if trip.capacity <= trip.counter:
+        return Response('The bus is full!')
 
-        data = request.data
-        seat = data['seatNum']
-        seatINT = int(seat)
+    data = request.data
+    seat = data['seatNum']
+    seatINT = int(seat)
 
-        if seatINT <= trip.capacity:
-            total = seatINT * trip.cost
-            if total <= profile.balance:
-                users = []
+    if seatINT <= trip.capacity:
+        total = seatINT * trip.cost
+        if total <= profile.balance:
+            users = []
 
-                for i in range(seatINT):
-                    next_seat = 'seat_' + str(i)
-                    next_phone = data[next_seat]
-                    try:
-                        users.append(Profile.objects.get(phone = next_phone))
-                    except Profile.DoesNotExist:
-                        return Response('There is a user who does not exist!')
-                        
-                for u in users:
-                    next_reservation = Reservation(owner_name = u.user.username, trip = trip, phone = u.phone, cost = trip.cost)
-                    next_reservation.save()
+            for i in range(seatINT):
+                next_seat = 'seat_' + str(i)
+                next_phone = data[next_seat]
+                try:
+                    users.append(Profile.objects.get(phone = next_phone))
+                except Profile.DoesNotExist:
+                    return Response('There is a user who does not exist!')
+                    
+            for u in users:
+                next_reservation = Reservation(owner_name = u.user.username, trip = trip, phone = u.phone, cost = trip.cost)
+                next_reservation.save()
 
-                profile.balance -= total
-                trip.counter += seatINT
-                return Response('Reservation successfully done.')
-            else:
-                return Response('No enouph money!')
+            profile.balance -= total
+            trip.counter += seatINT
+            return Response('Reservation successfully done.')
         else:
-            return Response('No enough space!')
+            return Response('No enouph money!')
+    else:
+        return Response('No enough space!')
         
-    return Response('Client is not logged in!')
 
 
 
