@@ -41,13 +41,13 @@ class Trip(models.Model):
 
 
 class Reservation(models.Model):
-    owner_name = models.CharField(max_length=100)
-    trip = models.ForeignKey(Trip, related_name='trip' , on_delete= models.CASCADE)
     phone = models.CharField(max_length=10)
+    trip = models.ForeignKey(Trip, related_name='trip' , on_delete= models.CASCADE)
+    desc = models.TextField()
     cost = models.IntegerField()
 
     def __str__(self):
-        return self.owner_name
+        return self.phone
 
     class meta:
         ordering = ['updated']

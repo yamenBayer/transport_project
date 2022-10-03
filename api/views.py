@@ -205,7 +205,7 @@ def log_in(request):
         login(request, user)
         prof = Profile.objects.get(user = user)
         serializer = ProfileSerializer(prof, many=False)
-        return Response(serializer)
+        return Response(serializer.data)
 
       return Response('Something went wrong!')
       
@@ -290,7 +290,10 @@ def search(request):
 @api_view(['PUT'])
 def takePlace(request, tid, e_wallet):
     profile = Profile.objects.get(e_Wallet = e_wallet)
-    trip = Trip.objects.get(id = tid)
+    try:
+        trip = Trip.objects.get(id = tid)
+    except Trip.DoesNotExist:
+        return Response('Trip is not exists!')
     if trip.capacity <= trip.counter:
         return Response('The bus is full!')
 
@@ -301,22 +304,29 @@ def takePlace(request, tid, e_wallet):
     if seatINT <= trip.capacity:
         total = seatINT * trip.cost
         if total <= profile.balance:
-            users = []
-
+            line = ''
             for i in range(seatINT):
-                next_seat = 'seat_' + str(i)
-                next_phone = data[next_seat]
-                try:
-                    users.append(Profile.objects.get(phone = next_phone))
-                except Profile.DoesNotExist:
-                    return Response('There is a user who does not exist!')
-                    
-            for u in users:
-                next_reservation = Reservation(owner_name = u.user.username, trip = trip, phone = u.phone, cost = trip.cost)
-                next_reservation.save()
+                next_name = 'seat_name_' + str(i)
+                next_public = 'seat_public_' + str(i)
+                next_gender = 'seat_gender_' + str(i)
+                name = data[next_name]
+                public = data[next_public]
+                gender = data[next_gender]
+                line += name + ' | ' + public + ' | ' + gender + '\n'
+                line += '------------------------------\n'
+                
+                # try:
+                #     users.append(Profile.objects.get(phone = next_phone))
+                # except Profile.DoesNotExist:
+                #     return Response('There is a user who does not exist!')
+            
+            next_reservation = Reservation(desc = line, trip = trip, phone = profile.phone, cost = total)
+            next_reservation.save()
 
             profile.balance -= total
+            profile.save()
             trip.counter += seatINT
+            trip.save()
             return Response('Reservation successfully done.')
         else:
             return Response('No enouph money!')
