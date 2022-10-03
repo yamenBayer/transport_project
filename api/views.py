@@ -124,7 +124,9 @@ def getRoutes(request):
             'body' : {
                 'seatNum': "Integer|Required",
                 'for i=0 to seatNum do:'
-                'seat_i': "String|Required",
+                'seat_name_i': "String|Required",
+                'seat_public_i': "String|Required",
+                'seat_gender_i': "String|Required",
                 },
             'description' : 'Make new reservation for one user or more.'
         },
