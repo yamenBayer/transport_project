@@ -9,7 +9,7 @@ urlpatterns = [
     path('logout', views.sign_out),
     path('trips', views.getTrips),
     path('trips/me/<str:e_wallet>', views.getMyTrips),
-    path('search/<str:source>/<str:destination>/<str:date>/<str:time>', views.search),
+    path('search', views.search),
     path('trips/create', views.createTrip),
     path('trips/<str:tid>/update', views.editTrip),
     path('trips/<str:tid>/delete', views.removeTrip),

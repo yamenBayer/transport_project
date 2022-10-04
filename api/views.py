@@ -89,7 +89,7 @@ def getRoutes(request):
             'body' : {
                 'first_name': "String",
                 'last_name': "String",
-                'public_Number': "String|Required",
+                'birthday': "String|Required",
                 'phone': "String|Required",
                 'gender': "String|Required",
                 'password': "String|Required",
@@ -125,7 +125,7 @@ def getRoutes(request):
                 'seatNum': "Integer|Required",
                 'for i=0 to seatNum do:'
                 'seat_name_i': "String|Required",
-                'seat_public_i': "String|Required",
+                'seat_birthday_i': "String|Required",
                 'seat_gender_i': "String|Required",
                 },
             'description' : 'Make new reservation for one user or more.'
@@ -155,7 +155,7 @@ def sign_up(request):
 
     first_name = data['first_name']
     last_name = data['last_name']
-    public_Number = data['public_Number']
+    birthday = data['birthday']
     phone = data['phone']
     gender = data['gender']
     password = data['password']
@@ -182,7 +182,7 @@ def sign_up(request):
 
     
     e_wallet = uuid.uuid4().hex[:6].upper()
-    new_profile = Profile(user = my_user, gender = gender, phone = phone, public_Number = public_Number, e_Wallet = e_wallet)
+    new_profile = Profile(user = my_user, gender = gender, phone = phone, birthday = birthday, e_Wallet = e_wallet)
     new_profile.save()
 
     return Response('Account created successfully!')
@@ -276,7 +276,7 @@ def removeTrip(request, tid):
     return Response('Trip deleted successfully!')
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 def search(request):
     data = request.data
     source = data['source']
@@ -308,13 +308,17 @@ def takePlace(request, tid, e_wallet):
         if total <= profile.balance:
             line = ''
             for i in range(seatINT):
+                name = birthday = gender = ''
                 next_name = 'seat_name_' + str(i)
-                next_public = 'seat_public_' + str(i)
+                next_birthday = 'seat_birthday_' + str(i)
                 next_gender = 'seat_gender_' + str(i)
-                name = data[next_name]
-                public = data[next_public]
-                gender = data[next_gender]
-                line += name + ' | ' + public + ' | ' + gender + '\n'
+                try:
+                    name = data[next_name]
+                    birthday = data[next_birthday]
+                    gender = data[next_gender]
+                except Exception as e:
+                    return Response('There is something wrong with the input fields!')
+                line += name + ' | ' + birthday + ' | ' + gender + '\n'
                 line += '------------------------------\n'
                 
                 # try:

@@ -7,7 +7,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     gender = models.CharField(max_length = 5)
     phone = models.CharField(max_length=10, unique=True)
-    public_Number = models.CharField(max_length=11, unique=True)
+    birthday = models.DateField(default=datetime.now)
     e_Wallet = models.CharField(max_length=10, unique=True)
     is_Admin = models.BooleanField(default=False)
     is_Charger = models.BooleanField(default=False)
