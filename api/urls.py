@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
     path('', views.getRoutes),
     path('signup', views.sign_up),
+    path('adminSignup', views.admin_sign_up),
     path('login', views.log_in),
     path('logout', views.sign_out),
     path('trips', views.getTrips),
@@ -16,4 +17,5 @@ urlpatterns = [
     path('trips/<str:e_wallet>/charge', views.charge),
     path('trips/<str:tid>/<str:e_wallet>/reservation', views.takePlace),
     path('trips/<str:tid>', views.getTrip),
+    path('changePhone', views.change_phone),
 ]

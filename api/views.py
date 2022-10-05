@@ -30,7 +30,7 @@ class EmailBackend(ModelBackend):
 def getRoutes(request):
     routes = [
         {
-            'Endpoint' : '/trips/',
+            'Endpoint' : '/trips',
             'method' : 'GET',
             'body' : None,
             'description' : 'Returns an array of trips'
@@ -42,7 +42,7 @@ def getRoutes(request):
             'description' : 'Returns a single trip object'
         },
         {
-            'Endpoint' : '/trips/create/',
+            'Endpoint' : '/trips/create',
             'method' : 'POST',
             'body' : {
                 'title': "String|Required",
@@ -56,7 +56,7 @@ def getRoutes(request):
             'description' : 'Create new trip with data sent in post request'
         },
         {
-            'Endpoint' : '/trips/<id>/update/',
+            'Endpoint' : '/trips/<id>/update',
             'method' : 'PUT',
             'body' : {
                 'title': "String|Required",
@@ -70,7 +70,7 @@ def getRoutes(request):
             'description' : 'Update trip information with data sent in post request'
         },
         {
-            'Endpoint' : '/trips/<id>/delete/',
+            'Endpoint' : '/trips/<id>/delete',
             'method' : 'DELETE',
             'body' : None,
             'description' : 'Deletes an existing trip'
@@ -84,7 +84,7 @@ def getRoutes(request):
             'description' : 'Charge an existing account with specific amount.'
         },
         {
-            'Endpoint' : '/signup/',
+            'Endpoint' : '/signup',
             'method' : 'POST',
             'body' : {
                 'first_name': "String",
@@ -98,7 +98,24 @@ def getRoutes(request):
             'description' : 'Create new account.'
         },
         {
-            'Endpoint' : '/login/',
+            'Endpoint' : '/adminSignup',
+            'method' : 'POST',
+            'body' : {
+                'first_name': "String",
+                'last_name': "String",
+                'birthday': "String|Required",
+                'phone': "String|Required",
+                'gender': "String|Required",
+                'password': "String|Required",
+                'password_confirm': "String|Required",
+                'is_Admin': "Boolean",
+                'is_Charger': "Boolean",
+                'balance': "Integer",
+                },
+            'description' : 'Create new account /Admin interface/.'
+        },
+        {
+            'Endpoint' : '/login',
             'method' : 'POST',
             'body' : {
                 'phone': "String|Required",
@@ -107,7 +124,7 @@ def getRoutes(request):
             'description' : 'Login to existing account.'
         },
         {
-            'Endpoint' : '/logout/',
+            'Endpoint' : '/logout',
             'method' : 'GET',
             'body' : None,
             'description' : 'Logout from the authenticated account.'
@@ -131,8 +148,8 @@ def getRoutes(request):
             'description' : 'Make new reservation for one user or more.'
         },
         {
-            'Endpoint' : 'search/',
-            'method' : 'GET',
+            'Endpoint' : '/search',
+            'method' : 'POST',
             'body' : {
                 'source': "String",
                 'destination': "String",
@@ -141,14 +158,22 @@ def getRoutes(request):
                 },
             'description' : 'Search for specific trip.'
         },
+        {
+            'Endpoint' : '/changePhone',
+            'method' : 'PUT',
+            'body' : {
+                'newPhone': "String"
+                },
+            'description' : 'Change phone number.'
+        },
 
     ]
     return Response(routes)
 
 @api_view(['POST'])
 def sign_up(request):
-  if request.user.is_authenticated:
-    return Response('Already logged in!')
+#   if request.user.is_authenticated:
+#     return Response('Already logged in!')
 
   if request.method == "POST":
     data = request.data
@@ -183,6 +208,58 @@ def sign_up(request):
     
     e_wallet = uuid.uuid4().hex[:6].upper()
     new_profile = Profile(user = my_user, gender = gender, phone = phone, birthday = birthday, e_Wallet = e_wallet)
+    new_profile.save()
+
+    return Response('Account created successfully!')
+    
+
+  return Response('Nothing!')     
+
+@api_view(['POST'])
+def admin_sign_up(request):
+  if request.method == "POST":
+    data = request.data
+
+    first_name = data['first_name']
+    last_name = data['last_name']
+    birthday = data['birthday']
+    phone = data['phone']
+    gender = data['gender']
+    password = data['password']
+    password_confirm = data['password_confirm']
+
+    is_Admin = data['is_Admin']
+    is_Charger = data['is_Charger']
+    balance = data['balance']
+
+    if balance < 0:
+        return Response('Can not insert negative balance!')
+
+    if Profile.objects.filter(phone = phone):
+      return Response('Client is already exist!')
+
+    if not len(phone) == 10 :
+      return Response('phone must be exactly 10 numbers!')
+
+    if len(password)<8:
+      return Response('Password must be at least 8 characters!')
+
+    if password != password_confirm:
+      return Response('password did not match!')
+
+    email = phone + "_TEC@gmail.com"
+    my_user = User.objects.create_user(phone,email,password)
+    my_user.first_name = first_name
+    my_user.last_name = last_name
+    my_user.is_active = True
+    my_user.save()
+
+    
+    e_wallet = uuid.uuid4().hex[:6].upper()
+    new_profile = Profile(user = my_user, gender = gender, phone = phone, birthday = birthday, e_Wallet = e_wallet)
+    new_profile.is_Admin = is_Admin
+    new_profile.is_Charger = is_Charger
+    new_profile.balance = balance
     new_profile.save()
 
     return Response('Account created successfully!')
@@ -360,4 +437,16 @@ def charge(request, e_wallet):
             return Response('No enouph money!')
     else:
         return Response('The client is not exists!')
+
+@api_view(['PUT'])
+def change_phone(request):
+    data = request.data
+
+    newPhone = data['newPhone']
+    my_profile = Profile.objects.get(user = request.user)
+    my_profile.phone = newPhone
+    my_profile.user.username = newPhone
+    my_profile.save()
+    return Response('Phone changed successfully.')
+
 
