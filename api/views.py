@@ -207,7 +207,7 @@ def sign_up(request):
 
     
     e_wallet = uuid.uuid4().hex[:6].upper()
-    new_profile = Profile(user = my_user, gender = gender, phone = phone, birthday = birthday, e_Wallet = e_wallet)
+    new_profile = Profile(user = my_user,first_name = my_user.first_name, last_name = my_user.last_name, gender = gender, phone = phone, birthday = birthday, e_Wallet = e_wallet)
     new_profile.save()
 
     return Response('Account created successfully!')
@@ -256,7 +256,7 @@ def admin_sign_up(request):
 
     
     e_wallet = uuid.uuid4().hex[:6].upper()
-    new_profile = Profile(user = my_user, gender = gender, phone = phone, birthday = birthday, e_Wallet = e_wallet)
+    new_profile = Profile(user = my_user, first_name = my_user.first_name, last_name = my_user.last_name, gender = gender, phone = phone, birthday = birthday, e_Wallet = e_wallet)
     new_profile.is_Admin = is_Admin
     new_profile.is_Charger = is_Charger
     new_profile.balance = balance
