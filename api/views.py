@@ -453,6 +453,7 @@ def change_phone(request, e_wallet):
     my_profile.phone = newPhone
     my_profile.user.username = newPhone
     my_profile.save()
+    my_profile.user.save()
     return Response('Phone changed successfully.')
 
 
