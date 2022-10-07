@@ -428,16 +428,19 @@ def charge(request, from_Wallet):
     if Profile.objects.filter(e_Wallet = forUser_Wallet).exists():
         for_profile = Profile.objects.get(e_Wallet = forUser_Wallet)
         from_profile = Profile.objects.get(e_Wallet = from_Wallet)
-        amount = data['amount']
-        amountINT = int(amount)
-        if from_profile.balance >= amountINT:
-            for_profile.balance += amountINT
-            from_profile.balance -= amountINT
-            from_profile.save()
-            for_profile.save()
-            return Response('Successfully charged!')
+        if from_profile.is_Charger:
+            amount = data['amount']
+            amountINT = int(amount)
+            if from_profile.balance >= amountINT:
+                for_profile.balance += amountINT
+                from_profile.balance -= amountINT
+                from_profile.save()
+                for_profile.save()
+                return Response('Successfully charged!')
+            else:
+                return Response('No enouph money!')
         else:
-            return Response('No enouph money!')
+            return Response('The profile is not charger!')
     else:
         return Response('The client is not exists!')
 
