@@ -79,6 +79,7 @@ def getRoutes(request):
             'Endpoint' : '/trips/<e_Wallet>/charge/',
             'method' : 'PUT',
             'body' : {
+                'e_Wallet': "String|Required",
                 'amount': "Integer|Required"
                 },
             'description' : 'Charge an existing account with specific amount.'
@@ -130,13 +131,13 @@ def getRoutes(request):
             'description' : 'Logout from the authenticated account.'
         },
         {
-            'Endpoint' : '/trips/me/<str:e_wallet>',
+            'Endpoint' : '/trips/me/<e_Wallet>',
             'method' : 'GET',
             'body' : None,
             'description' : 'Returns list of reservation for specific profile.'
         },
         {
-            'Endpoint' : 'trips/<trip_id>/<str:e_wallet>/reservation',
+            'Endpoint' : 'trips/<trip_id>/<e_Wallet>/reservation',
             'method' : 'PUT',
             'body' : {
                 'seatNum': "Integer|Required",
@@ -159,7 +160,7 @@ def getRoutes(request):
             'description' : 'Search for specific trip.'
         },
         {
-            'Endpoint' : '/changePhone/',
+            'Endpoint' : '/changePhone/<e_Wallet>',
             'method' : 'PUT',
             'body' : {
                 'newPhone': "String"
