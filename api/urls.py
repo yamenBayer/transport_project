@@ -8,7 +8,7 @@ urlpatterns = [
     path('adminSignup', views.admin_sign_up),
     path('login', views.log_in),
     path('logout', views.sign_out),
-    path('<str:e_wallet>/charge', views.charge),
+    path('charge/<str:from_Wallet>', views.charge),
     path('search', views.search),
     path('trips', views.getTrips),
     path('trips/me/<str:e_wallet>', views.getMyTrips),
