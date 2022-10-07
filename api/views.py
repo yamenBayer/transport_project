@@ -76,7 +76,7 @@ def getRoutes(request):
             'description' : 'Deletes an existing trip'
         },
         {
-            'Endpoint' : '/trips/<e_Wallet>/charge/',
+            'Endpoint' : '/<e_Wallet>/charge/',
             'method' : 'PUT',
             'body' : {
                 'e_Wallet': "String|Required",
