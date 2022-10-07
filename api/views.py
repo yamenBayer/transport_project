@@ -79,7 +79,7 @@ def getRoutes(request):
             'Endpoint' : '/<e_Wallet>/charge/',
             'method' : 'PUT',
             'body' : {
-                'e_Wallet': "String|Required",
+                'forUser_Wallet': "String|Required",
                 'amount': "Integer|Required"
                 },
             'description' : 'Charge an existing account with specific amount.'
