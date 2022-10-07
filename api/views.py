@@ -439,11 +439,11 @@ def charge(request, e_wallet):
         return Response('The client is not exists!')
 
 @api_view(['PUT'])
-def change_phone(request):
+def change_phone(request, e_wallet):
     data = request.data
 
     newPhone = data['newPhone']
-    my_profile = Profile.objects.get(user = request.user)
+    my_profile = Profile.objects.get(e_Wallet = e_wallet)
     my_profile.phone = newPhone
     my_profile.user.username = newPhone
     my_profile.save()
