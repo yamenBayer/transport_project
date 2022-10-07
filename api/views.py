@@ -159,7 +159,7 @@ def getRoutes(request):
             'description' : 'Search for specific trip.'
         },
         {
-            'Endpoint' : '/changePhone',
+            'Endpoint' : '/changePhone/',
             'method' : 'PUT',
             'body' : {
                 'newPhone': "String"

@@ -17,5 +17,5 @@ urlpatterns = [
     path('trips/<str:e_wallet>/charge', views.charge),
     path('trips/<str:tid>/<str:e_wallet>/reservation', views.takePlace),
     path('trips/<str:tid>', views.getTrip),
-    path('changePhone', views.change_phone),
+    path('changePhone/<str:e_wallet>', views.change_phone),
 ]
