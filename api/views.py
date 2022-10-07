@@ -232,7 +232,7 @@ def admin_sign_up(request):
     is_Charger = data['is_Charger']
     balance = data['balance']
 
-    if balance < 0:
+    if int(balance) < 0:
         return Response('Can not insert negative balance!')
 
     if Profile.objects.filter(phone = phone):
@@ -259,7 +259,7 @@ def admin_sign_up(request):
     new_profile = Profile(user = my_user, first_name = my_user.first_name, last_name = my_user.last_name, gender = gender, phone = phone, birthday = birthday, e_Wallet = e_wallet)
     new_profile.is_Admin = is_Admin
     new_profile.is_Charger = is_Charger
-    new_profile.balance = balance
+    new_profile.balance = int(balance)
     new_profile.save()
 
     return Response('Account created successfully!')
