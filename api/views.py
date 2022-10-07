@@ -420,18 +420,20 @@ def takePlace(request, tid, e_wallet):
 
 
 @api_view(['PUT'])
-def charge(request, e_wallet):
-    if Profile.objects.filter(e_Wallet = e_wallet).exists():
-        profile = Profile.objects.get(e_Wallet = e_wallet)
-        my_profile = Profile.objects.get(user = request.user)
-        data = request.data
+def charge(request, from_Wallet):
+    data = request.data
+
+    forUser_Wallet = data['forUser_Wallet']
+    if Profile.objects.filter(e_Wallet = forUser_Wallet).exists():
+        for_profile = Profile.objects.get(e_Wallet = forUser_Wallet)
+        from_profile = Profile.objects.get(e_Wallet = from_Wallet)
         amount = data['amount']
         amountINT = int(amount)
-        if my_profile.balance >= amountINT:
-            profile.balance += amountINT
-            my_profile.balance -= amountINT
-            my_profile.save()
-            profile.save()
+        if from_profile.balance >= amountINT:
+            for_profile.balance += amountINT
+            from_profile.balance -= amountINT
+            from_profile.save()
+            for_profile.save()
             return Response('Successfully charged!')
         else:
             return Response('No enouph money!')
