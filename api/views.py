@@ -313,7 +313,7 @@ def getTrip(request, tid):
 @api_view(['GET'])
 def getMyTrips(request, e_wallet):
     profile = Profile.objects.get(e_Wallet = e_wallet)
-    reservations = Reservation.objects.filter(phone = profile.phone)
+    reservations = Reservation.objects.filter(e_Wallet = profile.e_Wallet)
     serializer = ReservationSerializer(reservations, many=True)
     return Response(serializer.data)
 
@@ -396,15 +396,18 @@ def takePlace(request, tid, e_wallet):
                     gender = data[next_gender]
                 except Exception as e:
                     return Response('There is something wrong with the input fields!')
-                line += name + ' | ' + birthday + ' | ' + gender + '\n'
-                line += '------------------------------\n'
+                line += 'الراكب ' + str(i+1) + ':\n'
+                line += 'الاسم: ' + name + '\n'
+                line += 'المواليد: ' + birthday + '\n'
+                line += 'الجنس: ' + gender + '\n'
+                line += '\n\n'
                 
                 # try:
                 #     users.append(Profile.objects.get(phone = next_phone))
                 # except Profile.DoesNotExist:
                 #     return Response('There is a user who does not exist!')
             
-            next_reservation = Reservation(desc = line, trip = trip, phone = profile.phone, cost = total)
+            next_reservation = Reservation(desc = line, trip = trip, e_Wallet = profile.e_Wallet, cost = total)
             next_reservation.save()
 
             profile.balance -= total

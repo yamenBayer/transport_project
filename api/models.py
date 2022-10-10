@@ -43,13 +43,13 @@ class Trip(models.Model):
 
 
 class Reservation(models.Model):
-    phone = models.CharField(max_length=10)
+    e_Wallet = models.CharField(max_length=10)
     trip = models.ForeignKey(Trip, related_name='trip' , on_delete= models.CASCADE)
     desc = models.TextField()
     cost = models.IntegerField()
 
     def __str__(self):
-        return self.phone
+        return self.e_Wallet
 
     class meta:
         ordering = ['updated']
