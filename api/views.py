@@ -369,7 +369,12 @@ def search(request):
 
 @api_view(['PUT'])
 def takePlace(request, tid, e_wallet):
-    profile = Profile.objects.get(e_Wallet = e_wallet)
+    
+    try:
+        profile = Profile.objects.get(e_Wallet = e_wallet)
+    except Profile.DoesNotExist:
+        return Response('profile is not exists!')
+        
     try:
         trip = Trip.objects.get(id = tid)
     except Trip.DoesNotExist:
