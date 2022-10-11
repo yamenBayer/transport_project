@@ -321,8 +321,8 @@ def getMyTrips(request, e_wallet):
     tripSerializer = TripSerializer(trips, many=True)
 
     return Response({
-        "**Reservation**": reservationSerializer.data,
-        "**Trip**": tripSerializer.data
+        "Reservation": reservationSerializer.data,
+        "Trip": tripSerializer.data
         })
 
 
