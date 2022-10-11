@@ -314,8 +314,17 @@ def getTrip(request, tid):
 def getMyTrips(request, e_wallet):
     profile = Profile.objects.get(e_Wallet = e_wallet)
     reservations = Reservation.objects.filter(e_Wallet = profile.e_Wallet)
-    serializer = ReservationSerializer(reservations, many=True)
-    return Response(serializer.data)
+    trips = []
+    for res in reservations:
+        trips.append(res.trip)
+    reservationSerializer = ReservationSerializer(reservations, many=True)
+    tripSerializer = TripSerializer(trips, many=True)
+
+    return Response({
+        "**Reservation**": reservationSerializer.data,
+        "**Trip**": tripSerializer.data
+        })
+
 
 @api_view(['POST'])
 def createTrip(request):
@@ -369,16 +378,16 @@ def search(request):
 
 @api_view(['PUT'])
 def takePlace(request, tid, e_wallet):
-    
     try:
         profile = Profile.objects.get(e_Wallet = e_wallet)
     except Profile.DoesNotExist:
         return Response('profile is not exists!')
-        
+
     try:
         trip = Trip.objects.get(id = tid)
     except Trip.DoesNotExist:
         return Response('Trip is not exists!')
+        
     if trip.capacity <= trip.counter:
         return Response('The bus is full!')
 
